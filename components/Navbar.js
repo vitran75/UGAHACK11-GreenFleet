@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/context/AuthContext'
 import { useSidebar } from '@/context/SidebarContext'
+import UpdateTimer from '@/components/UpdateTimer'
 
 export default function Navbar() {
   const { user, isAuthenticated, logout, loading } = useAuth()
@@ -59,6 +60,7 @@ export default function Navbar() {
       <div className="navbar-links">
         {isAuthenticated ? (
           <>
+            <UpdateTimer />
             {/* User Dropdown */}
             <div className="dropdown" ref={dropdownRef}>
               <button

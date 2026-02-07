@@ -21,7 +21,7 @@ function DispatchContent() {
     const updateLocations = () => {
       const allMockLocations = getMockLocations();
       setDealerships(allMockLocations.filter((d) => d.type === 'dealership'));
-      setRecyclingCenters(allMockLocations.filter((d) => d.type === 'recycling'));
+      setRecyclingCenters(allMockLocations.filter((d) => d.type === 'zero-waste'));
     };
 
     updateLocations(); // Initial load
@@ -31,7 +31,12 @@ function DispatchContent() {
 
   useEffect(() => {
     if (dealerships.length && recyclingCenters.length) {
-      const planned = planRoutes(dealerships, recyclingCenters)
+      const planned = planRoutes(dealerships, recyclingCenters, {
+        maxStops: 8,
+        maxBatteries: 900,
+        maxMiles: 250,
+        urgencyDays: 7,
+      })
       setRoutes(planned)
       if (planned.length) setSelectedRouteId(planned[0].id)
     }

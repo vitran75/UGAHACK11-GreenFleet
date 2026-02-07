@@ -10,7 +10,10 @@ export function NotificationProvider({ children }) {
 
   const addNotification = useCallback((message, type = 'info', duration = 5000) => {
     const id = Date.now();
-    setNotifications((prev) => [...prev, { id, message, type }]);
+    setNotifications((prev) => {
+      const next = [...prev, { id, message, type }];
+      return next.length > 2 ? next.slice(next.length - 2) : next;
+    });
     setTimeout(() => {
       setNotifications((prev) => prev.filter((n) => n.id !== id));
     }, duration);
@@ -23,11 +26,17 @@ export function NotificationProvider({ children }) {
       const currentLocations = getMockLocations();
       currentLocations.forEach(location => {
         if (location.type === 'dealership') {
-          const currentStatus = location.needsPickupNotification;
+          const currentStatus = location.pickupNotificationLevel;
           const previousStatus = previousNotificationsState[location.id];
 
           if (currentStatus && !previousStatus) {
-            addNotification(`Pickup needed: ${location.name} is at ${((location.currentBatteryCount / location.maxCapacity) * 100).toFixed(0)}% capacity!`, 'warning');
+            const pct = location.maxCapacity
+              ? ((location.currentBatteryCount / location.maxCapacity) * 100).toFixed(0)
+              : '0';
+            addNotification(
+              `Pickup needed: ${location.name} is at ${pct}% capacity!`,
+              currentStatus
+            );
           }
           // If a pickup happens, we might want to clear existing notification for that location
           if (!currentStatus && previousStatus) {

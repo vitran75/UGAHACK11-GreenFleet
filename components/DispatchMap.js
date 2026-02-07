@@ -14,12 +14,10 @@ L.Icon.Default.mergeOptions({
 export default function DispatchMap({ routes, selectedRouteId, onSelectRoute }) {
   const mapRef = useRef(null)
   const containerRef = useRef(null)
+  const routeLayersRef = useRef(new Map())
 
   useEffect(() => {
-    if (mapRef.current) {
-      mapRef.current.remove()
-      mapRef.current = null
-    }
+    if (mapRef.current) return
 
     const map = L.map(containerRef.current).setView([39.8283, -98.5795], 4)
     mapRef.current = map
@@ -28,11 +26,26 @@ export default function DispatchMap({ routes, selectedRouteId, onSelectRoute }) 
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     }).addTo(map)
 
+    return () => {
+      map.remove()
+      mapRef.current = null
+    }
+  }, [])
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+
+    routeLayersRef.current.forEach((layerGroup) => {
+      layerGroup.markers.forEach((m) => m.remove())
+      layerGroup.polyline.remove()
+    })
+    routeLayersRef.current.clear()
+
     if (!routes || !routes.length) return
 
     routes.forEach((route) => {
-      const isSelected = route.id === selectedRouteId
-      const opacity = selectedRouteId && !isSelected ? 0.25 : 1
+      const markers = []
 
       // Recycling center marker
       const centerIcon = L.divIcon({
@@ -42,9 +55,10 @@ export default function DispatchMap({ routes, selectedRouteId, onSelectRoute }) 
         iconAnchor: [14, 14],
       })
 
-      L.marker([route.center.lat, route.center.lng], { icon: centerIcon, opacity })
+      const centerMarker = L.marker([route.center.lat, route.center.lng], { icon: centerIcon })
         .addTo(map)
         .bindPopup(`<strong>${route.center.name}</strong><br/>Recycling Center`)
+      markers.push(centerMarker)
 
       // Build polyline coords: center -> stops -> center
       const coords = [[route.center.lat, route.center.lng]]
@@ -59,22 +73,24 @@ export default function DispatchMap({ routes, selectedRouteId, onSelectRoute }) 
           iconAnchor: [12, 12],
         })
 
-        L.marker([stop.dealer.lat, stop.dealer.lng], { icon: stopIcon, opacity })
+        const stopMarker = L.marker([stop.dealer.lat, stop.dealer.lng], { icon: stopIcon })
           .addTo(map)
           .bindPopup(
             `<strong>${stop.dealer.name}</strong><br/>${stop.dealer.currentBatteryCount} batteries<br/>${Math.round(stop.distance)} mi from prev`
           )
+        markers.push(stopMarker)
       })
       coords.push([route.center.lat, route.center.lng])
 
       const polyline = L.polyline(coords, {
         color: route.color,
-        weight: isSelected ? 4 : 2,
-        opacity,
-        dashArray: isSelected ? null : '6,4',
+        weight: 3,
+        opacity: 1,
       }).addTo(map)
 
       polyline.on('click', () => onSelectRoute?.(route.id))
+
+      routeLayersRef.current.set(route.id, { markers, polyline })
     })
 
     // Fit bounds
@@ -85,12 +101,30 @@ export default function DispatchMap({ routes, selectedRouteId, onSelectRoute }) 
     if (allCoords.length) {
       map.fitBounds(allCoords, { padding: [30, 30] })
     }
+  }, [routes, onSelectRoute])
 
-    return () => {
-      map.remove()
-      mapRef.current = null
+  useEffect(() => {
+    routeLayersRef.current.forEach((layerGroup, id) => {
+      const isSelected = id === selectedRouteId
+      const opacity = selectedRouteId && !isSelected ? 0.25 : 1
+      layerGroup.markers.forEach((m) => m.setOpacity(opacity))
+      layerGroup.polyline.setStyle({
+        weight: isSelected ? 4 : 2,
+        opacity,
+        dashArray: isSelected ? null : '6,4',
+      })
+    })
+
+    if (!selectedRouteId) return
+    const map = mapRef.current
+    const group = routeLayersRef.current.get(selectedRouteId)
+    if (!map || !group) return
+
+    const bounds = group.polyline.getBounds()
+    if (bounds.isValid()) {
+      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 12, animate: true })
     }
-  }, [routes, selectedRouteId, onSelectRoute])
+  }, [selectedRouteId])
 
   return <div ref={containerRef} className="dispatch-map-leaflet" />
 }

@@ -123,6 +123,13 @@ export default function NearbyMap({
     const selectedMarker = dealerMarkersRef.current.get(selectedId)
     if (selectedMarker) {
       selectedMarker.openPopup()
+      const map = mapRef.current
+      if (map) {
+        const target = selectedMarker.getLatLng()
+        const currentZoom = map.getZoom()
+        const nextZoom = Math.max(currentZoom, 10)
+        map.setView(target, nextZoom, { animate: true })
+      }
     }
   }, [selectedId])
 
