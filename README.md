@@ -1,4 +1,7 @@
 # GreenFleet — Sustainability Fleet & Dispatch Manager
+Team Members
+Diego Sanchez-Carapia
+Vi Tran
 
 Built for **UGAHacks 11**. A real-time fleet management app for battery recycling operations across Ford dealerships. Tracks battery fill levels, visualizes fleet status on interactive maps, plans optimized pickup routes, and includes an AI-powered recyclability analyzer and chatbot.
 
