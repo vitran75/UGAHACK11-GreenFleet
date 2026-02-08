@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { getBatteryHistory, getMockLocations, getTotalBatteriesRecycled, getSimulatedDay, subscribeToMockData } from '@/lib/mock-data'
 import { computeDaysToFull, computeRiskLevel } from '@/lib/fleet-utils'
+import Link from 'next/link'
 import ImpactTrendChart from '@/components/ImpactTrendChart'
 
 const CO2_SAVED_PER_BATTERY_KG = 15
@@ -67,7 +68,6 @@ export default function SustainabilityDashboard() {
     .sort((a, b) => a.days - b.days)
     .slice(0, 5)
 
-  const [chatOpen, setChatOpen] = useState(false)
   const [chatMessages, setChatMessages] = useState([])
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -140,12 +140,6 @@ export default function SustainabilityDashboard() {
           <p className="impact-kicker">Sustainability Overview</p>
           <h1>Impact Control Center</h1>
         </div>
-        <nav className="impact-tabs">
-          <button className="impact-tab active">Overview</button>
-          <button className="impact-tab">Centers</button>
-          <button className="impact-tab">Routes</button>
-          <button className="impact-tab">Insights</button>
-        </nav>
       </header>
 
       <section className="impact-kpis-v2">
@@ -207,7 +201,7 @@ export default function SustainabilityDashboard() {
           <div className="impact-panel">
             <div className="impact-panel-header">
               <h2>Priority Pickups</h2>
-              <button className="impact-link">See all</button>
+              <Link href="/nearby" className="impact-link">See all</Link>
             </div>
             <ul className="impact-task-list">
               {urgentDealers.map((dealer) => (
@@ -225,55 +219,42 @@ export default function SustainabilityDashboard() {
           </div>
 
           <div className="impact-panel impact-assistant">
-            <h2>How can I help?</h2>
-            <p>Ask for optimizations, pickup balancing, or center-level insights.</p>
-            <button className="chat-open-btn" onClick={() => setChatOpen(true)}>Talk to GreenFleet AI</button>
-          </div>
-        </aside>
-      </section>
-
-      {chatOpen && (
-        <div className="chat-popup-overlay" onClick={() => setChatOpen(false)}>
-          <div className="chat-popup" onClick={(e) => e.stopPropagation()}>
-            <div className="chat-popup-header">
+            <div className="impact-assistant-header">
               <h2>GreenFleet AI</h2>
-              <button className="chat-popup-close" onClick={() => setChatOpen(false)}>&times;</button>
+              <span className="impact-pill">Live</span>
             </div>
-            <div className="chat-popup-body">
-              <div className="impact-assistant-chat">
-                {chatMessages.length === 0 && (
-                  <div className="chat-empty">Ask me anything about your fleet, routes, or sustainability impact.</div>
-                )}
-                {chatMessages.map((msg, i) => (
-                  <div key={i} className="chat-message">
-                    <span className={`chat-role ${msg.role === 'user' ? 'chat-role-user' : 'chat-role-assistant'}`}>
-                      {msg.role === 'user' ? 'You' : 'GreenFleet AI'}
-                    </span>
-                    {msg.content}
-                  </div>
-                ))}
-                {isLoading && <div className="chat-loading">Thinking...</div>}
-                <div ref={chatEndRef} />
-              </div>
+            <div className="impact-assistant-chat">
+              {chatMessages.length === 0 && (
+                <div className="chat-empty">Ask me anything about your fleet, routes, or sustainability impact.</div>
+              )}
+              {chatMessages.map((msg, i) => (
+                <div key={i} className="chat-message">
+                  <span className={`chat-role ${msg.role === 'user' ? 'chat-role-user' : 'chat-role-assistant'}`}>
+                    {msg.role === 'user' ? 'You' : 'GreenFleet AI'}
+                  </span>
+                  {msg.content}
+                </div>
+              ))}
+              {isLoading && <div className="chat-loading">Thinking...</div>}
+              <div ref={chatEndRef} />
             </div>
-            <div className="chat-popup-actions">
+            <div className="chat-inline-actions">
               <button disabled={isLoading} onClick={() => sendMessage('Generate a sustainability impact report summarizing recycled batteries, CO₂ avoided, water saved, and material recovered.')}>Generate report</button>
               <button disabled={isLoading} onClick={() => sendMessage('Tell me a fun and surprising fact about battery recycling or sustainability.')}>Fun fact</button>
             </div>
-            <div className="chat-popup-input">
+            <div className="chat-inline-input">
               <input
                 placeholder="Ask something..."
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') sendMessage() }}
                 disabled={isLoading}
-                autoFocus
               />
               <button onClick={() => sendMessage()} disabled={isLoading}>Send</button>
             </div>
           </div>
-        </div>
-      )}
+        </aside>
+      </section>
     </div>
   )
 }

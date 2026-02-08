@@ -7,7 +7,7 @@ import DealershipModal from '@/components/DealershipModal'
 import FleetSearchBar from '@/components/FleetSearchBar'
 import FleetFilterChips from '@/components/FleetFilterChips'
 import DealerDrawer from '@/components/DealerDrawer'
-import { getMockLocations, subscribeToMockData, simulatePickup } from '@/lib/mock-data'
+import { getMockLocations, subscribeToMockData, simulatePickup, addLocation, updateLocation } from '@/lib/mock-data'
 import {
   computeDaysToFull,
   computeRiskLevel,
@@ -71,8 +71,11 @@ function NearbyContent() {
   }
 
   const handleSave = async (formData) => {
-    // With mock data, we are not persisting changes from the modal for simplicity
-    // For a more advanced demo, one could implement mock update/insert logic in mock-data.js
+    if (editingDealership) {
+      updateLocation(editingDealership.id, formData)
+    } else {
+      addLocation(formData)
+    }
     setModalOpen(false)
   }
 

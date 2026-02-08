@@ -54,12 +54,6 @@ export default function Sidebar() {
     { id: 'dashboard', label: 'Dashboard', icon: '🏠', path: '/dashboard' },
     { id: 'nearby', label: 'Fleet Map', icon: '📍', path: '/nearby' },
     { id: 'dispatch', label: 'Dispatch', icon: '🚛', path: '/dispatch' },
-    { id: 'projects', label: 'Projects', icon: '📁', disabled: true },
-    { id: 'tasks', label: 'Tasks', icon: '✓', disabled: true },
-    { id: 'team', label: 'Team', icon: '👥', disabled: true },
-    { id: 'messages', label: 'Messages', icon: '💬', disabled: true },
-    { id: 'analytics', label: 'Analytics', icon: '📊', disabled: true },
-    { id: 'files', label: 'Files', icon: '📄', disabled: true },
   ]
 
   return (
@@ -73,21 +67,13 @@ export default function Sidebar() {
           <nav className="sidebar-nav">
             {menuItems.map((item) => (
               <div key={item.id} className="nav-item-wrapper">
-                {item.disabled ? (
-                  <div className="nav-item nav-item-disabled">
-                    <span className="nav-icon">{item.icon}</span>
-                    <span className="nav-label">{item.label}</span>
-                  </div>
-                ) : (
-                  <Link
-                    href={item.path}
-                    className={`nav-item ${isActive(item.path) ? 'active' : ''}`}
-                  >
-                    <span className="nav-icon">{item.icon}</span>
-                    <span className="nav-label">{item.label}</span>
-                    {item.badge && <span className="nav-badge">{item.badge}</span>}
-                  </Link>
-                )}
+                <Link
+                  href={item.path}
+                  className={`nav-item ${isActive(item.path) ? 'active' : ''}`}
+                >
+                  <span className="nav-icon">{item.icon}</span>
+                  <span className="nav-label">{item.label}</span>
+                </Link>
               </div>
             ))}
           </nav>
