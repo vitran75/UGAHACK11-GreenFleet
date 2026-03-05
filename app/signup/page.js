@@ -1,0 +1,27 @@
+'use client'
+
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/context/AuthContext'
+import Signup from '@/components/Signup'
+
+export default function SignupPage() {
+  const { isAuthenticated, loading } = useAuth()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      router.push('/dashboard')
+    }
+  }, [isAuthenticated, loading, router])
+
+  if (loading) {
+    return <div className="loading">Loading...</div>
+  }
+
+  if (isAuthenticated) {
+    return <div className="loading">Redirecting...</div>
+  }
+
+  return <Signup />
+}
